@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Test UI - ICA Backend</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #fdfdfd;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .col {
+      flex: 1;
+      min-width: 320px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #0076a8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    button.approve {
+      background: #28a745;
+      margin-left: 10px;
+    }
+
+    input,
+    select {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    hr {
+      border-color: #ddd;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Panel de Pruebas Rápidas ICA</h1>
+  <p>Estado Token: <strong id="token-status" style="color:red">No Autenticado</strong></p>
+
+  <div class="container">
+    <div class="col">
+      <div class="card" id="register-section">
+        <h3>1. Registrar Nuevo Usuario</h3>
+        <p style="font-size: 12px; color: gray;">
+          <i>Nota: Todos nacen en estado "Pendiente". El ID Municipio 1 debe existir ya en la BD.</i>
+          <br>
+          <i>Al registrarte se enviará un email de confirmación; para probarlo localmente usa <code>confirm.html</code>
+            servido en <code>http://localhost:4000/confirm.html</code>.</i>
+        </p>
+        <input type="text" id="reg-cc" placeholder="CC" />
+        <input type="text" id="reg-nombre" placeholder="Nombre" />
+        <input type="text" id="reg-apellido" placeholder="Apellido" />
+        <input type="text" id="reg-dir" placeholder="Dirección" value="Bela Vista" />
+        <input type="text" id="reg-tel" placeholder="Teléfono" value="3000000" />
+        <input type="email" id="reg-email" placeholder="Correo electrónico" />
+        <input type="password" id="reg-password" placeholder="Clave" />
+        <select id="reg-rol">
+          <option value="Productor">Productor</option>
+          <option value="Asistente Tecnico">Asistente Técnico</option>
+          <option value="Propietario">Propietario</option>
+          <option value="Funcionario">Funcionario (Para crearlo de una vez)</option>
+        </select>
+        <button onclick="register()">Registrar</button>
+        <pre id="reg-res"></pre>
+      </div>
+
+      <div class="card" id="login-section">
+        <h3>2. Iniciar Sesión</h3>
+        <input type="email" id="email" placeholder="Correo" />
+        <input type="password" id="password" placeholder="Clave" />
+        <select id="tiporol">
+          <option value="Productor">Productor</option>
+          <option value="Asistente Tecnico">Asistente Técnico</option>
+          <option value="Propietario">Propietario</option>
+          <option value="Funcionario">Funcionario</option>
+        </select>
+        <button onclick="login()">Login</button>
+        <pre id="login-res"></pre>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card" id="admin-section">
+        <h3>Panel Administrador (Requiere estar logueado como Admin Activo)</h3>
+        <p style="font-size: 12px; color: gray;">
+          <b>TRUCO PARA EL PRIMER ADMIN:</b> Regístrate como Admin aquí en la web, luego ve a Supabase SQL y ejecuta:
+          <br>
+          <code style="background: yellow;">UPDATE usuarios SET estado = 'Activo' WHERE rol = 'Admin';</code>
+        </p>
+        <button onclick="fetchPendingUsers()">1. Cargar Usuarios Pendientes</button>
+        <pre id="pendientes-res"></pre>
+
+        <hr>
+        <input type="text" id="approve-uuid" placeholder="Pega el 'id' (UUID) del usuario aquí" />
+        <button class="approve" onclick="approveUser()">2. Aprobar Usuario (Pasar a 'Activo')</button>
+        <pre id="admin-res"></pre>
+      </div>
+
+      <div class="card" id="entities-section">
+        <h3>Prueba General</h3>
+        <p>Probar roles (Propietario/Productor)</p>
+        <button onclick="fetchMisPredios()">Traer mis Predios</button>
+        <button onclick="fetchSolicitudes()">Ver mis Inspecciones</button>
+
+        <button onclick="fetchMunicipios()">Ver municipios</button>
+        <p id="departamentos">shssjh</p>
+        <pre id="gen-res"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let JWT_TOKEN = '';
+
+    const BASE_URL_1 = 'http://localhost:3001/api';
+    const BASE_URL_2 = 'http://localhost:3002/api';
+
+    async function register() {
+      const data = {
+        cc: document.getElementById('reg-cc').value,
+        nombre: document.getElementById('reg-nombre').value,
+        apellido: document.getElementById('reg-apellido').value,
+        direccion_residencia: document.getElementById('reg-dir').value,
+        telefono: document.getElementById('reg-tel').value,
+        correo_electronico: document.getElementById('reg-email').value,
+        clave: document.getElementById('reg-password').value,
+        rol: document.getElementById('reg-rol').value,
+        tarjeta_profesional: "TP-" + Math.floor(Math.random() * 1000),
+        id_municipio: 1 // Forzamos el ID de municipio 1 para efectos de prueba ágil
+      };
+
+      try {
+        const res = await fetch(`${BASE_URL_1}/users/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const out = await res.json();
+        document.getElementById('reg-res').innerText = JSON.stringify(out, null, 2);
+      } catch (err) {
+        document.getElementById('reg-res').innerText = err.message;
+      }
+    }
+
+    async function login() {
+      const em = document.getElementById('email').value;
+      const rol = document.getElementById('tiporol').value;
+      console.log(rol);
+      const pw = document.getElementById('password').value;
+      try {
+        const res = await fetch(`${BASE_URL_1}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: em, password: pw, rol: rol })
+        });
+        const out = await res.json();
+        document.getElementById('login-res').innerText = JSON.stringify(out, null, 2);
+        if (out.status === 'success') {
+          JWT_TOKEN = out.data.session.access_token;
+          document.getElementById('token-status').innerText = 'Autenticado ✔️ (' + out.data.user.rol + ' - ' + out.data.user.estado + ')';
+          document.getElementById('token-status').style.color = 'green';
+        }
+      } catch (err) {
+        document.getElementById('login-res').innerText = err.message;
+      }
+    }
+
+    async function fetchPendingUsers() {
+      if (!JWT_TOKEN) return alert('Inicia sesión como Admin primero!');
+      try {
+        const res = await fetch(`${BASE_URL_1}/users/pending`, {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+        });
+        const data = await res.json();
+        console.log(data);
+
+        document.getElementById('pendientes-res').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('pendientes-res').innerText = err.message;
+      }
+    }
+
+    async function approveUser() {
+      if (!JWT_TOKEN) return alert('Inicia sesión como Admin primero!');
+      const targetId = document.getElementById('approve-uuid').value;
+      if (!targetId) return alert('Escribe o pega el UUID del usuario');
+
+      try {
+        const res = await fetch(`${BASE_URL_1}/users/${targetId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + JWT_TOKEN },
+          body: JSON.stringify({ estado: 'Activo' })
+        });
+        const data = await res.json();
+        document.getElementById('admin-res').innerText = JSON.stringify(data, null, 2);
+
+        // Refrescar pendientes
+        fetchPendingUsers();
+      } catch (err) {
+        document.getElementById('admin-res').innerText = err.message;
+      }
+    }
+
+    async function fetchMisPredios() {
+      if (!JWT_TOKEN) return alert('Inicia sesión primero!');
+      try {
+        const res = await fetch(`${BASE_URL_1}/locations/predios`, {
+          headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+        });
+        document.getElementById('gen-res').innerText = JSON.stringify(await res.json(), null, 2);
+      } catch (err) { document.getElementById('gen-res').innerText = err.message; }
+    }
+
+    async function fetchSolicitudes() {
+      if (!JWT_TOKEN) return alert('Inicia sesión primero!');
+      try {
+        const res = await fetch(`${BASE_URL_2}/inspections/solicitudes`, {
+          headers: { 'Authorization': 'Bearer ' + JWT_TOKEN }
+        });
+        document.getElementById('gen-res').innerText = JSON.stringify(await res.json(), null, 2);
+      } catch (err) { document.getElementById('gen-res').innerText = err.message; }
+    }
+    async function fetchDepartamentos() {
+      try {
+        const res = await fetch(`${BASE_URL_1}/locations/departamentos`, {
+          method: 'GET'
+        });
+        const data = await res.json();
+        console.log(data);
+        document.getElementById('departamentos').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('departamentos').innerText = err.message;
+      }
+    }
+
+    async function fetchMunicipios() {
+      try {
+        const res = await fetch(`${BASE_URL_1}/locations/municipios`, {
+          method: 'GET'
+        });
+        const data = await res.json();
+        document.getElementById('departamentos').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('departamentos').innerText = err.message;
+      }
+    }
+  </script>
+</body>
+
+</html>
