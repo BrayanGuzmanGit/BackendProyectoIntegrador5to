@@ -1,6 +1,7 @@
 const userRepository = require('./userRepository');
 const AppError = require('../../shared/AppError');
 
+
 class UserService {
   async signUp(userData) {
     //Verificamos que la cc no este ya en la base de datos
@@ -86,6 +87,14 @@ class UserService {
       throw new AppError('Acción inválida. El estado debe ser "Activo" o "Eliminado"', 400);
     }
     return await userRepository.updateEstado(cc, action);
+  }
+
+  async editProfile(id, nombre, direccion, apellido, telefono, email, password) {
+    const updatedUser = await userRepository.updateProfile(id, nombre, direccion, apellido, telefono, email, password);
+    if (!updatedUser) {
+      throw new AppError('No se pudo actualizar el perfil', 500);
+    }
+    return updatedUser;
   }
 }
 

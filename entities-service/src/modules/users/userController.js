@@ -49,11 +49,11 @@ class UserController {
       next(error);
     }
   }
-
-  async myProfile(req, res, next) {
+  async editProfile(req, res, next) {
     try {
-      // req.userProfile viene inyectado desde el roleMiddleware
-      return ApiResponse.success(res, req.userProfile, 'Perfil obtenido');
+      const { nombre, apellido, direccion, telefono, email, password } = req.body;
+      const updatedUser = await userService.editProfile(req.user.id, nombre, direccion, apellido, telefono, email, password);
+      return ApiResponse.success(res, updatedUser, 'Perfil actualizado con éxito');
     } catch (error) {
       next(error);
     }

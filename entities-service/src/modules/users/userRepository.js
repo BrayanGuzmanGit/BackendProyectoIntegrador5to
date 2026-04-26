@@ -95,6 +95,17 @@ class UserRepository {
     return data;
   }
 
+  async updateProfile(id, nombre, direccion_residencia, apellido, telefono, correo_electronico, clave) {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .update({ nombre, direccion_residencia, apellido, telefono, correo_electronico, clave })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new AppError(error.message, 400);
+    return data;
+  }
+
 
 }
 
