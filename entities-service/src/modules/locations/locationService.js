@@ -80,7 +80,7 @@ class LocationService {
   async deletePredio(numeroRegistro, ownerId) {
     //1. Traer info del predio desde la base de datos
     const predio = await locationRepository.getPredioByNumeroRegistro(numeroRegistro);
-
+    
     //2. Lógica de Negocio: Verificar propiedad (Responsabilidad del Service)
     if (predio.id_usuario_propietario !== ownerId) {
       throw new AppError('Solo el propietario del predio puede eliminarlo', 403);
@@ -94,10 +94,7 @@ class LocationService {
   }
 
 
-
-
   //===Lugares de produccion===
-
   async registerLugarProduccion(dataLugar, producerId) {
     try {
       const lugarBody = {

@@ -28,8 +28,6 @@ const editProfileSchema = z.object({
 
 
 class UserValidator {
-
-
   validateRegister(req, res, next) {
     try {
       req.body = registerSchema.parse(req.body);
@@ -56,6 +54,7 @@ class UserValidator {
       next(error);
     }
   }
+  
 }
 
 module.exports = new UserValidator();

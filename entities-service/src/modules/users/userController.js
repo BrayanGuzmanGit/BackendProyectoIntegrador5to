@@ -9,7 +9,7 @@ class UserController {
 
       //Se le envia al servicio
       const result = await userService.signUp(userData);
-
+      
       //Si todo sale bien, se le responde al cliente asi
       return ApiResponse.success(res, result, 'Usuario registrado con éxito. Por favor espera la aprobación del Admin.', 201);
     } catch (error) {

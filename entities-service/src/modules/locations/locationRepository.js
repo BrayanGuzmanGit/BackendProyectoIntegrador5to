@@ -73,6 +73,7 @@ class LocationRepository {
     return data;
   }
 
+
   //Despues quitar el .eq('id_usuario_propietario', id_propietario)
   //y mejor validar que si es el dueño del predio en el service
   async editPredio(nombre, area, id_propietario, numeroRegistro) {
@@ -88,18 +89,18 @@ class LocationRepository {
     return data;
   }
 
-  async deletePredio(id_predio) {
+
+  async deletePredio(numeroRegistro) {
     const { data, error } = await supabase
       .from('predio')
       .delete()
-      .eq('id', id_predio)
+      .eq('numero_registro', numeroRegistro)
       .select()
       .single();
 
     if (error) throw new AppError(error.message, 400);
     return data;
   }
-
 
 
   // === Lugares de Produccion ===
