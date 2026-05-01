@@ -181,31 +181,51 @@ class LocationRepository {
     return data;
   }
 
-  async getLugaresByProductor(id_productor) {
+    async getLugaresByProductor(id_productor) {
     const { data, error } = await supabase
       .from('lugar_produccion')
       .select('*')
       .eq('uidproductor', id_productor);
 
     if (error) throw new AppError(error.message, 500);
-    const lugaresConCentral = await Promise.all(
-      data.map(async (lugar) => {
-        const { data: predioCentral, error: errorPredio } = await supabase
-          .from('predio')
-          .select('nombre')
-          .eq('id_lugar_produccion', lugar.id)
-          .eq('es_central', true)
-          .single();
 
+    const lugaresEnriquecidos = await Promise.all(
+      data.map(async (lugar) => {
+        // 1. Traemos TODOS los predios de este lugar (pedimos nombre, área y si es central)
+        const { data: prediosAsociados } = await supabase
+          .from('predio')
+          .select('nombre, area, es_central')
+          .eq('id_lugar_produccion', lugar.id);
+
+        let areaTotal = 0;
+        let predioCentral = null;
+
+        // 2. Si encontró predios, los recorremos para sumar el área y encontrar el central
+        if (prediosAsociados && prediosAsociados.length > 0) {
+          prediosAsociados.forEach(predio => {
+            // Sumamos el área (asegurándonos de que sea un número)
+            areaTotal += Number(predio.area || 0);
+            
+            // Si este predio en particular es el central, lo guardamos
+            if (predio.es_central) {
+              predioCentral = { nombre: predio.nombre };
+            }
+          });
+        }
+
+        // 3. Devolvemos la caja original + el central + la nueva Área Total
         return {
           ...lugar,
-          predioCentral: predioCentral || null
+          predioCentral: predioCentral || null,
+          areaTotal: areaTotal
+          //Modificar para que tambien traiga el area cultivada que es la suma del area de todos los lotes
         };
       })
     );
 
-    return lugaresConCentral;
+    return lugaresEnriquecidos;
   }
+
 
   async getLugarByNumeroRegistro(numeroRegistro) {
     const { data, error } = await supabase

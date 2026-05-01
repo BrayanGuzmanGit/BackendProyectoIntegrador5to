@@ -2,7 +2,6 @@ const locationService = require('./locationService');
 const ApiResponse = require('../../shared/ApiResponse');
 
 class LocationController {
-
   //===PREDIOS===
   async createPredio(req, res, next) {
     try {
@@ -135,6 +134,7 @@ async editPredio(req, res, next) {
     }
   }
 
+
   //===LOTES===
   async addLot(req, res, next) {
     try {
@@ -154,6 +154,7 @@ async editPredio(req, res, next) {
   }
 
 
+
   //===Departamentos y municipios===
   async getDepartamentos(req, res, next) {
     try {
@@ -171,7 +172,6 @@ async editPredio(req, res, next) {
       next(error);
     }
   }
-
   
 }
 module.exports = new LocationController();

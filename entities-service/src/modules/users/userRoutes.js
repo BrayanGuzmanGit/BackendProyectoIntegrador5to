@@ -14,6 +14,6 @@ router.get('/pending', authMiddleware, roleMiddleware('Funcionario'), userContro
 router.patch('/:cc/status', authMiddleware, roleMiddleware('Funcionario'), userController.changeUserStatus);
 
 // === Rutas Protegidas (Usuarios activos) ===
-router.patch('/user/editProfile', authMiddleware, userController.editProfile);
+router.patch('/editProfile', authMiddleware, userController.editProfile);
 
 module.exports = router;

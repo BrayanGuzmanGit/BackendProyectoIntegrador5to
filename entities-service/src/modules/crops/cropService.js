@@ -21,6 +21,5 @@ class CropService {
   async getPlagasPorCultivo(idCultivo) {
     return await cropRepository.getPlagasPorCultivo(idCultivo);
   }
-
 }
 module.exports = new CropService();
