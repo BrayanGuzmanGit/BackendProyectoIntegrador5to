@@ -18,7 +18,7 @@ router.post('/lugares', authMiddleware, roleMiddleware('Productor'), locationCon
 router.patch('/lugares/predioCentral', authMiddleware, roleMiddleware('Productor'), locationController.setPredioCentral);
 router.get('/lugares/:id_productor', authMiddleware, roleMiddleware('Productor'), locationController.getMyLugares);
 router.patch('/lugares/:numeroRegistro', authMiddleware, roleMiddleware('Productor'), locationController.editNameLugar);
-router.get('/lugares/:id_lugar/predios', authMiddleware, roleMiddleware('Productor'), locationController.getPrediosPorLugar);
+router.get('/lugares/:id_lugar/predios', authMiddleware, roleMiddleware('Productor'), locationController.getPrediosByLugar);
 router.delete('/lugares/delete/:numeroRegistro', authMiddleware, roleMiddleware('Productor'), locationController.deleteLugar);
 
 // === Ruta para listar lotes por lugar de produccion

@@ -46,8 +46,8 @@ class LocationService {
   }
 
 
-  async getPrediosPorLugar(id_lugar){
-    return await locationRepository.getPrediosPorLugar(id_lugar);
+  async getPrediosByLugar(id_lugar){
+    return await locationRepository.getPrediosByLugar(id_lugar);
   }
 
 
@@ -155,7 +155,7 @@ class LocationService {
       throw new AppError('Solo el productor del lugar de produccion puede eliminarlo', 403);
     }
     //3. verificar que el lugar de produccion no tenga predios asociados
-    const predios = await locationRepository.getPrediosPorLugar(lugar.id);
+    const predios = await locationRepository.getPrediosByLugar(lugar.id);
     if (predios.length > 0) {
       throw new AppError('El lugar de produccion tiene predios asociados, debe desvincularlos para eliminarlo', 400);
     }

@@ -44,4 +44,4 @@ class CropController {
   }
 
 }
-module.exports = new CropController();
+  module.exports = new CropController();

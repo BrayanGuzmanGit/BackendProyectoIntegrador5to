@@ -5,7 +5,6 @@ class UserRepository {
   // =============================================
   // CAPA DE AUTH (Supabase Auth)
   // =============================================
-
   async authSignUp(email, password) {
     const { data, error } = await supabase.auth.signUp(
       { email, password }
@@ -44,8 +43,6 @@ class UserRepository {
     if (error) throw new AppError(error.message, 400);
     return data;
   }
-
-
 
   async findUserById(id) {
     const { data, error } = await supabase

@@ -59,6 +59,7 @@ class UserService {
     if (localUser.estado === 'Eliminado') {
       throw new AppError('Tu cuenta ha sido eliminada por el administrador.', 403);
     }
+    
     if (localUser.estado !== 'Activo') {
       throw new AppError(
         `Tu perfil aún no ha sido aprobado. Estado actual: ${localUser.estado}`,
@@ -67,7 +68,7 @@ class UserService {
 
     }
     if (localUser.rol !== rol) {
-      throw new AppError('Rol incorrecto', 403);
+      throw new AppError('Usuario no encontrado', 403);
     }
 
     return {
@@ -80,13 +81,13 @@ class UserService {
     return await userRepository.getPendingUsers();
   }
 
-  async approveUser(cc, action) {
+  async approveUser(cc, status) {
     // Regla de negocio: solo estos dos estados son válidos como destino
     const allowedStates = ['Activo', 'Eliminado'];
-    if (!allowedStates.includes(action)) {
+    if (!allowedStates.includes(status)) {
       throw new AppError('Acción inválida. El estado debe ser "Activo" o "Eliminado"', 400);
     }
-    return await userRepository.updateEstado(cc, action);
+    return await userRepository.updateEstado(cc, status);
   }
 
   async editProfile(id, nombre, direccion, apellido, telefono, email, password) {

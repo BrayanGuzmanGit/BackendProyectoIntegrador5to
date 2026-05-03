@@ -16,4 +16,4 @@ router.patch('/:cc/status', authMiddleware, roleMiddleware('Funcionario'), userC
 // === Rutas Protegidas (Usuarios activos) ===
 router.patch('/editProfile', authMiddleware, userController.editProfile);
 
-module.exports = router;
+module.exports = router;    

@@ -13,7 +13,6 @@ class ApiResponse {
       message
     };
     if (details) errorResponse.details = details;
-    
     return res.status(statusCode).json(errorResponse);
   }
 }

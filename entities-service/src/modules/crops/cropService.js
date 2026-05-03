@@ -1,5 +1,5 @@
 const cropRepository = require('./cropRepository');
-
+//luego llamar a AppError
 class CropService {
   async registerCrop(data) {
     // Aquí puedes incluir reglas de validación adicionales

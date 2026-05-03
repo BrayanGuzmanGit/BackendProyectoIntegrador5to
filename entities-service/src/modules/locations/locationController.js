@@ -5,8 +5,6 @@ class LocationController {
   //===PREDIOS===
   async createPredio(req, res, next) {
     try {
-      console.log("req.body: ", req.body);
-      console.log("req.user.id: ", req.user.id);
       const predio = await locationService.registerPredio(req.body, req.user.id);
       return ApiResponse.success(res, predio, 'Predio creado existosamente', 201);
     } catch (error) {
@@ -34,10 +32,10 @@ class LocationController {
     }
   }
 
-  async getPrediosPorLugar(req, res, next) {
+  async getPrediosByLugar(req, res, next) {
     try {
       const { id_lugar } = req.params;
-      const predios = await locationService.getPrediosPorLugar(id_lugar);
+      const predios = await locationService.getPrediosByLugar(id_lugar);
       return ApiResponse.success(res, predios, 'Predios obtenidos');
     } catch (error) {
       next(error);
@@ -46,18 +44,18 @@ class LocationController {
 
   async unlinkLugarPredio(req, res, next) {
     try {
-      const {id_predio} = req.body;
+      const { id_predio } = req.body;
       const updatedPredio = await locationService.unlinkLugarFromPredio(id_predio, req.user.id);
       return ApiResponse.success(res, updatedPredio, 'Lugar de Producción desvinculado del Predio exitosamente');
-    }catch(err){
+    } catch (err) {
       next(err);
     }
   }
 
-async editPredio(req, res, next) {
+  async editPredio(req, res, next) {
     try {
-      const {numeroRegistro } = req.params;
-      const {nombre, area} = req.body;
+      const { numeroRegistro } = req.params;
+      const { nombre, area } = req.body;
       const id_propietario = req.user.id;
       const updatedPredio = await locationService.editPredio(nombre, area, id_propietario, numeroRegistro);
       return ApiResponse.success(res, updatedPredio, 'Predio editado exitosamente');
@@ -68,7 +66,7 @@ async editPredio(req, res, next) {
 
   async deletePredio(req, res, next) {
     try {
-      const {numeroRegistro} = req.params;
+      const { numeroRegistro } = req.params;
       const id_propietario = req.user.id;
       const deletedPredio = await locationService.deletePredio(numeroRegistro, id_propietario);
       return ApiResponse.success(res, deletedPredio, 'Predio eliminado exitosamente');
@@ -76,7 +74,7 @@ async editPredio(req, res, next) {
       next(error);
     }
   }
-  
+
 
 
   //===Lugares de produccion===
@@ -102,8 +100,8 @@ async editPredio(req, res, next) {
 
   async editNameLugar(req, res, next) {
     try {
-      const {numeroRegistro} = req.params;
-      const { nuevoNombre} = req.body;
+      const { numeroRegistro } = req.params;
+      const { nuevoNombre } = req.body;
       const id_productor = req.user.id;
       const updatedLugar = await locationService.editNameLugar(numeroRegistro, nuevoNombre, id_productor);
       return ApiResponse.success(res, updatedLugar, 'Lugar de Producción editado exitosamente');
@@ -112,24 +110,24 @@ async editPredio(req, res, next) {
     }
   }
 
-  async deleteLugar(req,res,next){
-    try{
-      const {numeroRegistro} = req. params;
+  async deleteLugar(req, res, next) {
+    try {
+      const { numeroRegistro } = req.params;
       const id_productor = req.user.id;
       const deletedLugar = await locationService.deleteLugar(numeroRegistro, id_productor);
       return ApiResponse.success(res, deletedLugar, 'Lugar de Producción eliminado exitosamente');
-    }catch(err){
+    } catch (err) {
       next(err);
     }
   }
 
   async setPredioCentral(req, res, next) {
     try {
-      const {numeroRegistroLugar} = req.body;
-      const {numeroRegistroPredio} = req.body; //predio
+      const { numeroRegistroLugar } = req.body;
+      const { numeroRegistroPredio } = req.body; //predio
       const updatedLugar = await locationService.setPredioCentral(numeroRegistroLugar, numeroRegistroPredio, req.user.id);
       return ApiResponse.success(res, updatedLugar, 'Predio central establecido exitosamente');
-    }catch(err){
+    } catch (err) {
       next(err);
     }
   }
@@ -172,6 +170,6 @@ async editPredio(req, res, next) {
       next(error);
     }
   }
-  
+
 }
 module.exports = new LocationController();

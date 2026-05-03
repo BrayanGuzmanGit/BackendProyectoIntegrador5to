@@ -41,7 +41,7 @@ class LocationRepository {
 
     // 2. Actualizar el predio con la foránea del lugar
     const { data, error } = await supabase
-      .from('predio')
+      .from('predio') 
       .update({ id_lugar_produccion: idLugar })
       .eq('id', idPredio)
       .select()
@@ -63,7 +63,7 @@ class LocationRepository {
     return data;
   }
 
-  async getPrediosPorLugar(id_lugar_produccion) {
+  async getPrediosByLugar(id_lugar_produccion) {
     const { data, error } = await supabase
       .from('predio')
       .select('*, municipio:id_municipio (nombre)')
