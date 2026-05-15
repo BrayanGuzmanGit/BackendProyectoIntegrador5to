@@ -22,7 +22,6 @@ const authMiddleware = async (req, res, next) => {
     console.log("------------------------------------------------------------")
     console.log("req.headers: ", req.headers);
     console.log("------------------------------------------------------------")
-
     // Attach user al request
     req.user = authUser;
     next();

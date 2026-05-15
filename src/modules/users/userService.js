@@ -77,6 +77,18 @@ class UserService {
     };
   }
 
+  async getProfile(id) {
+    const user = await userRepository.findUserById(id);
+    if (!user) {
+      throw new AppError('Usuario no encontrado', 404);
+    }
+    if (user.estado !== 'Activo') {
+      throw new AppError('Usuario inactivo o congelado no puede acceder al perfil', 403);
+    }
+    return user;
+  }
+
+
   async getPendingUsers() {
     return await userRepository.getPendingUsers();
   }

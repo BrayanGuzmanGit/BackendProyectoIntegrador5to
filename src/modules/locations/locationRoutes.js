@@ -21,12 +21,11 @@ router.patch('/lugares/:numeroRegistro', authMiddleware, roleMiddleware('Product
 router.get('/lugares/:id_lugar/predios', authMiddleware, roleMiddleware('Productor'), locationController.getPrediosByLugar);
 router.delete('/lugares/delete/:numeroRegistro', authMiddleware, roleMiddleware('Productor'), locationController.deleteLugar);
 
-// === Ruta para listar lotes por lugar de produccion
-router.get('/lotes/:id_lugar', authMiddleware, roleMiddleware('Productor'), locationController.getLotesPorLugar);
-
 
 // Ruta creacion de lote (solo para productor)
 router.post('/lotes', authMiddleware, roleMiddleware('Productor'), locationController.addLot);
+router.get('/lotes/:id_lugar', authMiddleware, roleMiddleware('Productor'), locationController.getLotesPorLugar);
+
 
 // === Rutas de departamentos y municipio (publicas)
 router.get('/departamentos', locationController.getDepartamentos);

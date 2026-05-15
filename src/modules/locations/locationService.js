@@ -59,14 +59,35 @@ class LocationService {
     if (predio.id_usuario_propietario !== ownerId) {
       throw new AppError('Solo el propietario del predio puede desvincular un lugar de produccion', 403);
     }
+
     //3. verificar que el predio tenga un lugar de produccion asignado
     if (predio.id_lugar_produccion === null) {
       throw new AppError('El predio no tiene un lugar de produccion asignado', 400);
     }
 
+    //4. verificar que el predio no sea central
     if (predio.es_central === true) {
       throw new AppError('El predio es central, no se puede desvincular del lugar de produccion', 400);
     }
+
+    //Traemos los lotes asociados al lugar de produccion
+    const lotes = await locationRepository.getLotesPorLugar(predio.id_lugar_produccion);
+    let areaCultivada = 0;
+    lotes.forEach(lote => {
+      areaCultivada=areaCultivada+Number(lote.area || 0);
+    });
+
+    const predios = await locationRepository.getPrediosByLugar(predio.id_lugar_produccion);
+    let areaTotalLugar = 0;
+    predios.forEach(predio => {
+      areaTotalLugar=areaTotalLugar+Number(predio.area || 0);
+    });
+
+    //Verificar que el area cultivada no sea mayor al area que queda disponible al eliminar el predio del lugar
+      if (areaCultivada > (areaTotalLugar - predio.area)) {
+      throw new AppError('El predio no se puede desvincular del lugar de produccion porque el area cultivada es mayor al area disponible del lugar de produccion', 400);
+    }
+
     //4. Desvincular (Responsabilidad del Repo)
     return await locationRepository.unlinkLugarFromPredio(id_predio);
   }
@@ -126,7 +147,7 @@ class LocationService {
     //3. Traer info del predio desde la base de datos
     const predio = await locationRepository.getPredioByNumeroRegistro(numeroRegistroPredio);
 
-    //4. Lógica de Negocio: Verificar propiedad (Responsabilidad del Service)
+    //4. Verificar propiedad 
     if (predio.id_lugar_produccion !== lugar.id) {
       throw new AppError('El predio no pertenece al lugar de produccion', 403);
     }
@@ -136,14 +157,13 @@ class LocationService {
       throw new AppError('El predio ya es central', 400);
     }
 
-    const lugarYaTieneCentral = await locationRepository.verificarSiTienePredioCentral(lugar.id);
-
-    if (lugarYaTieneCentral) {
-      throw new AppError('Este lugar de producción ya tiene un predio central. Solo se permite uno.', 400);
+    const lugarYaTieneCentral = await locationRepository.verificarSiTienePredioCentral(lugar.id); 
+    if (lugarYaTieneCentral[0] == 1) {// esto da true si el lugar ya tiene un predio central asignado, y false si no tiene.
+        await locationRepository.configurarPredioCentral(lugarYaTieneCentral[1], false); // Primero desmarcamos el predio central actual
+        return await locationRepository.configurarPredioCentral(predio.id, true); //Se marca el nuevo predio como central
+    }else{
+        return await locationRepository.configurarPredioCentral(predio.id, true); // Si no hay predio central, simplemente marcamos el nuevo como central
     }
-
-    //6. Establecer el predio central
-    return await locationRepository.setPredioCentral(predio.id);
   }
 
   async deleteLugar(numeroRegistro, ownerId) {
@@ -172,12 +192,38 @@ class LocationService {
 
 
   //===LOTES
-  async registerLot(data) {
-    // Si necesitas validar que el lugar de produccion pertenezca al productor,
-    // se podría hacer una consulta extra al 'locationRepository'. 
-    // Por simplicidad y eficiencia de MVP, registramos el dato proveniente del request.
+  async registerLot(data, id_productor) {
+    const { uidlugarproduccion, area } = data;
+    console.log('Data que recibe el service:', data);
+
+    // Validacion de que el lugar de produccion pertenezca al productor
+    console.log('ID del lugar de produccion recibido en el service:', uidlugarproduccion);
+    const lugar = await locationRepository.getLugarById(uidlugarproduccion);
+    if (lugar.uidproductor !== id_productor) {
+      throw new AppError('Solo el productor del lugar de produccion puede agregar lotes', 403);
+    }
+
+    //Validacion de que el area del lote no exceda el area total del lugar de produccion
+    const predios = await locationRepository.getPrediosByLugar(uidlugarproduccion);
+    let areaTotalLugar = 0;
+    predios.forEach(predio => {
+      areaTotalLugar=areaTotalLugar+Number(predio.area || 0);
+    });
+    
+    let areaCultivada = 0;
+    const lotes = await locationRepository.getLotesPorLugar(uidlugarproduccion);
+    lotes.forEach(lote => {
+      areaCultivada=areaCultivada+Number(lote.area || 0);
+    });
+
+    const areaDisponible = areaTotalLugar - areaCultivada;
+
+    if (area > areaDisponible) {
+      throw new AppError('El area del lote excede el area disponible del lugar de produccion', 400);
+    }
     return await locationRepository.createLot(data);
   }
+
 
   async getLotesPorLugar(id_lugar) {
     return await locationRepository.getLotesPorLugar(id_lugar);

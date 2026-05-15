@@ -29,6 +29,15 @@ class UserController {
     }
   }
 
+  async getProfile(req, res, next) {
+    try {
+      const user = await userService.getProfile(req.user.id);
+      return ApiResponse.success(res, user, 'Perfil recuperado');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async listPending(req, res, next) {
     try {
       const users = await userService.getPendingUsers();

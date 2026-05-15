@@ -12,6 +12,7 @@ router.post('/login', userController.login);
 // Permite al admin listar usuarios congelados y cambiar su estado
 router.get('/pending', authMiddleware, roleMiddleware('Funcionario'), userController.listPending);
 router.patch('/:cc/status', authMiddleware, roleMiddleware('Funcionario'), userController.changeUserStatus);
+router.get('/me', authMiddleware, userController.getProfile);
 
 // === Rutas Protegidas (Usuarios activos) ===
 router.patch('/editProfile', authMiddleware, userController.editProfile);

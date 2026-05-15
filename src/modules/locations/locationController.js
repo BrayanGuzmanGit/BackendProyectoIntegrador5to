@@ -135,11 +135,13 @@ class LocationController {
 
   //===LOTES===
   async addLot(req, res, next) {
+    const loteData = req.body;
     try {
-      const result = await locationService.registerLot(req.body, req.user.id);
+      const result = await locationService.registerLot(loteData, req.user.id);
       return ApiResponse.success(res, result, 'Lote registrado adecuadamente', 201);
     } catch (err) { next(err); }
   }
+
 
   async getLotesPorLugar(req, res, next) {
     try {

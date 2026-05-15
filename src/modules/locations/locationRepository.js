@@ -164,15 +164,19 @@ class LocationRepository {
       throw new AppError(error.message, 500);
     }
 
-    // Como no usamos .single(), 'data' es un Array ([]). 
-    // Si su longitud es mayor a 0, significa que sí existe uno central y devolvemos true.
-    return data.length > 0;
+    // Como no usamos .single(), 'data' es un Array ([]).
+    if(data.length === 0) {
+      return [0]; // No hay predio central, devolvemos un array con un 0 para indicar eso.
+    }
+
+    const datos = [data.length, data[0].id];
+    return datos;
   }
 
-  async setPredioCentral(id_predio) {
+  async configurarPredioCentral(id_predio, is_central) {
     const { data, error } = await supabase
       .from('predio')
-      .update({ es_central: true })
+      .update({ es_central: is_central })
       .eq('id', id_predio)
       .select()
       .single();
@@ -226,6 +230,16 @@ class LocationRepository {
     return lugaresEnriquecidos;
   }
 
+  async getLugarById(id_lugar) {
+    const { data, error } = await supabase
+      .from('lugar_produccion')
+      .select('*')
+      .eq('id', id_lugar)
+      .single();
+
+    if (error || !data) throw new AppError('Lugar de produccion no encontrado', 404);
+    return data;
+  }
 
   async getLugarByNumeroRegistro(numeroRegistro) {
     const { data, error } = await supabase
@@ -275,7 +289,7 @@ class LocationRepository {
     const { data, error } = await supabase
       .from('lote')
       .select('*')
-      .eq('id_lugar_produccion', id_lugar);
+      .eq('uidlugarproduccion', id_lugar);
 
     if (error) throw new AppError(error.message, 500);
     return data;
