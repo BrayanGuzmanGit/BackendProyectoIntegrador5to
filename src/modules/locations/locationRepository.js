@@ -155,7 +155,7 @@ class LocationRepository {
   async verificarSiTienePredioCentral(id_lugar_produccion) {
     const { data, error } = await supabase
       .from('predio')
-      .select('id')   // Optimización: Solo trae el ID, es más rápido que select('*')
+      .select('id')
       .eq('id_lugar_produccion', id_lugar_produccion)
       .eq('es_central', true);
 
@@ -231,6 +231,7 @@ class LocationRepository {
   }
 
   async getLugarById(id_lugar) {
+    console.log("Lugar encontrado en repository: "+id_lugar);
     const { data, error } = await supabase
       .from('lugar_produccion')
       .select('*')

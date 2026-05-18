@@ -1,5 +1,6 @@
 const locationService = require('./locationService');
 const ApiResponse = require('../../shared/ApiResponse');
+const console = require('node:console');
 
 class LocationController {
   //===PREDIOS===
@@ -98,6 +99,16 @@ class LocationController {
     }
   }
 
+  async getLugarProduccionbyId(req, res, next) {
+    try {
+      const { id_lugar } = req.params;
+      const lugar = await locationService.getLugarProduccionbyId(id_lugar);
+      return ApiResponse.success(res, lugar, 'Lugar obtenido');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async editNameLugar(req, res, next) {
     try {
       const { numeroRegistro } = req.params;
@@ -128,6 +139,16 @@ class LocationController {
       const updatedLugar = await locationService.setPredioCentral(numeroRegistroLugar, numeroRegistroPredio, req.user.id);
       return ApiResponse.success(res, updatedLugar, 'Predio central establecido exitosamente');
     } catch (err) {
+      next(err);
+    }
+  }
+  
+  async verificarPredioCentral(req,res, next){
+    try{
+      const { id_lugar } = req.params;
+      const updatedLugar = await locationService.verificarPredioCentral(id_lugar, req.user.id);
+      return ApiResponse.success(res, updatedLugar, 'Se encontro un predio central');
+    }catch(err){
       next(err);
     }
   }

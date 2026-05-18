@@ -77,6 +77,17 @@ class UserController {
       next(error);
     }
   }
+  async getAllActiveUsers(req, res, next) {
+    try {
+      const users = await userService.getAllActiveUsers();
+      return ApiResponse.success(res, users, 'Usuarios activos recuperados');
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+
+
+
 
 module.exports = new UserController();

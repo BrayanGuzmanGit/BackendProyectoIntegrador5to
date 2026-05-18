@@ -15,7 +15,9 @@ router.delete('/predio/delete/:numeroRegistro', authMiddleware, roleMiddleware('
 
 // === Rutas de Lugares de Producción ===
 router.post('/lugares', authMiddleware, roleMiddleware('Productor'), locationController.createLugarProduccion);
+router.get('/lugar/:id_lugar', authMiddleware, roleMiddleware('Productor'), locationController.getLugarProduccionbyId);
 router.patch('/lugares/predioCentral', authMiddleware, roleMiddleware('Productor'), locationController.setPredioCentral);
+router.get('/lugares/verificarCentral/:id_lugar', authMiddleware, roleMiddleware('Productor'), locationController.verificarPredioCentral);
 router.get('/lugares/:id_productor', authMiddleware, roleMiddleware('Productor'), locationController.getMyLugares);
 router.patch('/lugares/:numeroRegistro', authMiddleware, roleMiddleware('Productor'), locationController.editNameLugar);
 router.get('/lugares/:id_lugar/predios', authMiddleware, roleMiddleware('Productor'), locationController.getPrediosByLugar);

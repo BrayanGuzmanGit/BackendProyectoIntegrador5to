@@ -128,6 +128,16 @@ class UserRepository {
     return data;
   }
 
+  async getAllActiveUsers() {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('estado', 'Activo');
+    
+    if (error) throw new AppError(error.message, 500);
+    return data;
+  }
+
 
 }
 

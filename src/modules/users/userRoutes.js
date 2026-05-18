@@ -13,6 +13,7 @@ router.post('/login', userController.login);
 router.get('/pending', authMiddleware, roleMiddleware('Funcionario'), userController.listPending);
 router.patch('/:cc/status', authMiddleware, roleMiddleware('Funcionario'), userController.changeUserStatus);
 router.get('/me', authMiddleware, userController.getProfile);
+router.get('/all', authMiddleware, roleMiddleware('Funcionario'), userController.getAllActiveUsers);
 
 // === Rutas Protegidas (Usuarios activos) ===
 router.patch('/editProfile', authMiddleware, userController.editProfile);

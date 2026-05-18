@@ -14,14 +14,6 @@ const authMiddleware = async (req, res, next) => {
 
     // Verifica el token contra Supabase Auth a través del Repository
     const authUser = await userRepository.verifyToken(token);
-    console.log("authUser: ", authUser);
-    console.log("------------------------------------------------------------")
-    console.log("authHeader: ", authHeader);
-    console.log("------------------------------------------------------------")
-    console.log("req: ", req);
-    console.log("------------------------------------------------------------")
-    console.log("req.headers: ", req.headers);
-    console.log("------------------------------------------------------------")
     // Attach user al request
     req.user = authUser;
     next();
@@ -35,6 +27,7 @@ const authMiddleware = async (req, res, next) => {
 const roleMiddleware = (...roles) => {
   return async (req, res, next) => {
     try {
+      console.log("reqUser.........: ", req.user);
       if (!req.user) {
         throw new AppError('Usuario no autenticado en chequear rol.', 401);
       }

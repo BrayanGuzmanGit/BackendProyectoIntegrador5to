@@ -135,6 +135,19 @@ class LocationService {
     return await locationRepository.editNameLugar(numeroRegistro, nuevoNombre, id_productor);
   }
 
+  async verificarPredioCentral(id_lugar, id_user){
+    const lugar = await locationRepository.getLugarById(id_lugar);
+    if (lugar.uidproductor !== id_user) {
+      throw new AppError('No eres el dueño de este lugar de produccion', 403);
+    }
+    const lugarYaTieneCentral = await locationRepository.verificarSiTienePredioCentral(lugar.id); 
+    if (lugarYaTieneCentral[0] == 1) {// esto da true si el lugar ya tiene un predio central asignado, y false si no tiene.
+        return true
+    }else{
+        return false
+    }
+  }
+
   async setPredioCentral(numeroRegistroLugar, numeroRegistroPredio, id_productor) {
     //1. Traer info del lugar de produccion desde la base de datos
     const lugar = await locationRepository.getLugarByNumeroRegistro(numeroRegistroLugar);
@@ -188,6 +201,9 @@ class LocationService {
 
   async getMyLugares(id_productor) {
     return await locationRepository.getLugaresByProductor(id_productor);
+  }
+   async getLugarProduccionbyId(id_lugar) {
+    return await locationRepository.getLugarById(id_lugar);
   }
 
 

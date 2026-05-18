@@ -137,6 +137,10 @@ class UserService {
     }
     return updatedUser;
   }
+
+  async getAllActiveUsers() {
+    return await userRepository.getAllActiveUsers();
+  }
 }
 
 module.exports = new UserService();
