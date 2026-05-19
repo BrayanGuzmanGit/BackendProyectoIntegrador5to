@@ -245,6 +245,55 @@ class LocationService {
     return await locationRepository.getLotesPorLugar(id_lugar);
   }
 
+  async editLot(numero_registro, area, id_productor, fecharecoleccion, uidlugarproduccion){
+    const lugar = await locationRepository.getLugarProduccionbyId(uidlugarproduccion)
+    if(lugar.uidproductor !== id_productor){
+      throw new AppError('Solo el productor del lugar de produccion puede editar el lote', 403);
+    }
+    
+    const lotes = await locationRepository.getLotesPorLugar(uidlugarproduccion);
+    let areaCultivada = 0;
+    lotes.forEach(lote=>{
+      areaCultivada=areaCultivada+Number(lote.area || 0);
+    })
+
+    const predios = await locationRepository.getPrediosByLugar(uidlugarproduccion);
+    let areaTotalLugar= 0;
+    predios.forEach(predio=>{
+      areaTotalLugar=areaTotalLugar+Number(predio.area || 0);
+    })
+    
+    const loteActual = await locationRepository.getLoteByNumero(numero_registro);
+
+    const areaCultivadaRestante = areaCultivada - Number(loteActual.area);
+
+    if ((areaCultivadaRestante+area)>areaTotalLugar){
+      throw new AppError('El area disponible es: '+(areaTotalLugar - areaCultivadaRestante)+ 'por lo tanto el area: '+ area+ ' excede el limite y no se puede editar el lote.', 400);
+    }
+
+    try{
+      if(lote.fechasiembra > fecharecoleccion){
+        throw new AppError('La fecha de siembra: '+ lote.fechasiembra + ' no puede ser mayor a la fecha de recoleccion: ' + fecharecoleccion, 400);
+      }
+    }
+    catch(err){
+      throw new AppError(err.message, 400);
+    }
+
+    return await locationRepository.editLot(numero_registro, area, fecharecoleccion);
+  }
+
+  async deleteLot(numero_registro, id_productor, id_lugar_produccion){
+    const lugar = await locationRepository.getLugarProduccionbyId(id_lugar_produccion)
+    if(lugar.uidproductor !== id_productor){
+      throw new AppError('Solo el productor del lugar de produccion puede eliminar el lote', 403);
+    }
+    try{
+      return await locationRepository.deleteLot(numero_registro);
+    }catch(err){
+      throw new AppError(err.message, 400);
+    }
+  }
 
   //===Departamentos y municipios===
   async getDepartamentos() {

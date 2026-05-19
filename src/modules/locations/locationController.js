@@ -174,6 +174,28 @@ class LocationController {
     }
   }
 
+  async editLot(req, res, next) {
+    try {
+      const { numero_registro } = req.params;
+      const { area, fecharecoleccion, uidlugarproduccion} = req.body;
+      const id_productor = req.user.id;
+      const updatedLote = await locationService.editLot(numero_registro, area, id_productor, fecharecoleccion, uidlugarproduccion);
+      return ApiResponse.success(res, updatedLote, 'Lote editado exitosamente');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteLot(req, res, next) {
+    try {
+      const { numero_registro, uidlugarproduccion } = req.params;
+      const id_productor = req.user.id;
+      const deletedLote = await locationService.deleteLot(numero_registro, id_productor, uidlugarproduccion);
+      return ApiResponse.success(res, deletedLote, 'Lote eliminado exitosamente');
+    } catch (err) {
+      next(err);
+    }
+  }
 
 
   //===Departamentos y municipios===

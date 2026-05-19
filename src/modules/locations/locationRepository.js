@@ -289,10 +289,54 @@ class LocationRepository {
   async getLotesPorLugar(id_lugar) {
     const { data, error } = await supabase
       .from('lote')
-      .select('*')
+      .select('*, cultivo:uidcultivo(nombre_comun)')//Traer tambien el nombre del cultivo
       .eq('uidlugarproduccion', id_lugar);
 
     if (error) throw new AppError(error.message, 500);
+    return data;
+  }
+
+  async getLotesById(id_lote){
+    const { data, error } = await supabase
+      .from('lote')
+      .select('*')
+      .eq('id', id_lote)
+      .single();
+
+    if (error || !data) throw new AppError('Lote no encontrado', 404);
+    return data;
+  }
+
+  async getLoteByNumero(numero_registro) {
+    const { data, error } = await supabase
+      .from('lote')
+      .select('*')
+      .eq('numero_registro', numero_registro)
+      .single();
+
+    if (error || !data) throw new AppError('Lote no encontrado', 404);
+    return data;
+  }
+
+  async editLot(numeroRegistro, area, fecharecoleccion){
+    const { data, error } = await supabase
+      .from('lote')
+      .update({ numero_registro: numeroRegistro, area: area, fecharecoleccion: fecharecoleccion })
+      .eq('numero_registro', numeroRegistro)
+      .single();
+
+    if (error) throw new AppError(error.message, 400);
+    return data;
+  }
+
+  async deleteLot(numeroRegistro) {
+    const { data, error } = await supabase
+      .from('lote')
+      .delete()
+      .eq('numero_registro', numeroRegistro)
+      .single();
+
+    if (error) throw new AppError(error.message, 400);
     return data;
   }
 
